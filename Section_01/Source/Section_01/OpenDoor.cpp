@@ -20,7 +20,6 @@ void UOpenDoor::BeginPlay()
 	Owner = GetOwner();
 	if( Owner )
 	{
-		ActorThatOpens = Owner->GetWorld()->GetFirstPlayerController()->GetPawn();
 		OrigYaw = Owner->GetActorRotation().Yaw;
 	}
 }
@@ -31,17 +30,12 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if( PresurePlate )
+	if (GetTotalMassOfActorsOnPlate() > 50.0f)
 	{
-		if(Owner)
-		{
-			if( PresurePlate->IsOverlappingActor( ActorThatOpens ) )
-			{
-				OpenDoor();
-				LastDoorOpenTime = GetWorld()->GetTimeSeconds();
-			}
-		}
+		OpenDoor();
+		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
+
 	if( GetWorld()->GetTimeSeconds() > LastDoorOpenTime + DoorCloseDelay)
 	{
 		CloseDoor();
@@ -56,4 +50,14 @@ void UOpenDoor::OpenDoor( void )
 void UOpenDoor::CloseDoor(void)
 {
 	Owner->SetActorRotation(FRotator(0.0f, OrigYaw, 0.0f));
+}
+
+float UOpenDoor::GetTotalMassOfActorsOnPlate(void)
+{
+	return(60.0f);
+	if (PresurePlate)
+	{
+		TArray<AActor*> ActorList;
+		PresurePlate->GetOverlappingActors(ActorList);
+	}
 }

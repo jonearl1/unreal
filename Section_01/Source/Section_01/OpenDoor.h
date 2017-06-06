@@ -35,6 +35,9 @@ public:
 
 		
 private:
+
+	float GetTotalMassOfActorsOnPlate(void);
+
 	UPROPERTY(EditAnywhere)
 	float	OpenAngle = -90.0f;
 
@@ -45,7 +48,6 @@ private:
 	float DoorCloseDelay = 1.0f;
 
 	//UPROPERTY( EditAnywhere )
-	AActor *ActorThatOpens = NULL;
 	float LastDoorOpenTime = 0.0f;
 	AActor *Owner = NULL;
 	float OrigYaw = 0.0f;

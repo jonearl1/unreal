@@ -6,11 +6,7 @@
 // Sets default values for this component's properties
 UGrabber::UGrabber()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -49,60 +45,51 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (PhysicsHandle->GetGrabbedComponent())
-	{
-		FVector Pos;
-		FRotator Rot;
-
-		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
-
-		FVector EndPos = Pos + Rot.Vector() * Reach;
-
-		PhysicsHandle->SetTargetLocation(EndPos);
-	}
+		PhysicsHandle->SetTargetLocation(GetAttachedPos());
 }
 
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
 	FHitResult Result = GetFirstPhysicsBodyInReach();
 	AActor *ActorHit = Result.GetActor();
 	if (ActorHit)
 	{
 		auto ComponentToGrab = Result.GetComponent();
-		UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(ActorHit->GetName()));
 		PhysicsHandle->GrabComponentAtLocation( ComponentToGrab, NAME_None, ComponentToGrab->GetOwner()->GetActorLocation());
 	}
-
 }
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab released")); 
-	
 	auto GrabbedComponent = PhysicsHandle->GetGrabbedComponent();
 	if (GrabbedComponent)
-	{
 		PhysicsHandle->ReleaseComponent();
-	}
-
 }
 
 FHitResult UGrabber::GetFirstPhysicsBodyInReach(void)
 {
-	FVector Pos;
-	FRotator Rot;
-
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
-
-	FVector EndPos = Pos + Rot.Vector() * Reach;
-
 	/// see what we hit
 	FHitResult Result;
 	FCollisionQueryParams TraceQParams(FName(TEXT("")), false, GetOwner());
 	FCollisionObjectQueryParams ObjectQParams(ECollisionChannel::ECC_PhysicsBody);
 
-	if (GetWorld()->LineTraceSingleByObjectType(Result, Pos, EndPos, ObjectQParams, TraceQParams))
-	{
-	}
+	GetWorld()->LineTraceSingleByObjectType(Result, GetPlayerPos(), GetAttachedPos(), ObjectQParams, TraceQParams);
 	return(Result);
+}
+
+FVector UGrabber::GetAttachedPos(void)
+{
+	FVector Pos;
+	FRotator Rot;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
+	FVector EndPos = Pos + Rot.Vector() * Reach;
+	return(EndPos);
+}
+
+FVector UGrabber::GetPlayerPos(void)
+{
+	FVector Pos;
+	FRotator Rot;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
+	return(Pos);
 }

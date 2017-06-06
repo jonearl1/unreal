@@ -31,6 +31,8 @@ private:
 
 	void SetupInputComponent(void);
 	FHitResult GetFirstPhysicsBodyInReach(void);
+	FVector GetAttachedPos(void);
+	FVector GetPlayerPos(void);
 
 	float Reach = 100.0f;
 	UPhysicsHandleComponent *PhysicsHandle = nullptr;
