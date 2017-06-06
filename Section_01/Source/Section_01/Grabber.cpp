@@ -30,6 +30,7 @@ void UGrabber::BeginPlay()
 	if (PawnInput)
 	{
 		PawnInput->BindAction(TEXT("Grab"), IE_Pressed, this, &UGrabber::Grab);
+		PawnInput->BindAction(TEXT("Grab"), IE_Released, this, &UGrabber::Release);
 	}
 	else
 	{
@@ -79,5 +80,10 @@ void UGrabber::Grab()
 			UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(ActorHit->GetName()));
 		}
 	}
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab released"));
 }
 

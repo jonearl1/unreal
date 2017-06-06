@@ -32,4 +32,6 @@ private:
 	UInputComponent *PawnInput = nullptr;
 	//RayCast and grab what's in reach
 	void Grab(void);
+	// release the grabbed object
+	void Release(void);
 };
