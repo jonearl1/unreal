@@ -16,22 +16,23 @@ class SECTION_01_API UGrabber : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UGrabber();
-
-protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	float Reach = 100.0f;
-
-	UPhysicsHandleComponent *PhysicsHandle = nullptr;
-	UInputComponent *PawnInput = nullptr;
 	//RayCast and grab what's in reach
 	void Grab(void);
 	// release the grabbed object
 	void Release(void);
+
+	void FindPhysicsHandleComponent(void);
+
+	void SetupInputComponent(void);
+	FHitResult GetFirstPhysicsBodyInReach(void);
+
+	float Reach = 100.0f;
+	UPhysicsHandleComponent *PhysicsHandle = nullptr;
+	UInputComponent *PawnInput = nullptr;
 };

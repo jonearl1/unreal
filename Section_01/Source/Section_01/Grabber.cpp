@@ -18,14 +18,12 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
+	FindPhysicsHandleComponent();
+	SetupInputComponent();
+}
 
-	UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty"));
-
-	///Look for physics handle
-	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (!PhysicsHandle)
-		UE_LOG(LogTemp, Error, TEXT("Physics Handle not found on Actor %s"), *(GetOwner()->GetName() ) );
-
+void UGrabber::SetupInputComponent(void)
+{
 	PawnInput = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (PawnInput)
 	{
@@ -37,29 +35,60 @@ void UGrabber::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Pawn Input not found on Actor %s"), *(GetOwner()->GetName()));
 	}
 }
-
+///Look for physics handle
+void UGrabber::FindPhysicsHandleComponent(void)
+{
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!PhysicsHandle)
+		UE_LOG(LogTemp, Error, TEXT("Physics Handle not found on Actor %s"), *(GetOwner()->GetName()));
+}
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	/// Get player viewpoint this tick
-	FVector Pos;
-	FRotator Rot;
+	if (PhysicsHandle->GetGrabbedComponent())
+	{
+		FVector Pos;
+		FRotator Rot;
 
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
+		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
 
-	/// UE_LOG(LogTemp, Warning, TEXT("PlayerPos %s, PlayerRot %s"), *Pos.ToString(), *Rot.ToString());
-	/// Ray - cast out to reach distance
+		FVector EndPos = Pos + Rot.Vector() * Reach;
 
-	FVector EndPos = Pos + Rot.Vector() * Reach;
-	DrawDebugLine(GetWorld(), Pos, EndPos, FColor(255, 0, 0), false, 0.0f, 0, 10.0f );
+		PhysicsHandle->SetTargetLocation(EndPos);
+	}
 }
 
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
+	FHitResult Result = GetFirstPhysicsBodyInReach();
+	AActor *ActorHit = Result.GetActor();
+	if (ActorHit)
+	{
+		auto ComponentToGrab = Result.GetComponent();
+		UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(ActorHit->GetName()));
+		PhysicsHandle->GrabComponentAtLocation( ComponentToGrab, NAME_None, ComponentToGrab->GetOwner()->GetActorLocation());
+	}
+
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab released")); 
+	
+	auto GrabbedComponent = PhysicsHandle->GetGrabbedComponent();
+	if (GrabbedComponent)
+	{
+		PhysicsHandle->ReleaseComponent();
+	}
+
+}
+
+FHitResult UGrabber::GetFirstPhysicsBodyInReach(void)
+{
 	FVector Pos;
 	FRotator Rot;
 
@@ -74,16 +103,6 @@ void UGrabber::Grab()
 
 	if (GetWorld()->LineTraceSingleByObjectType(Result, Pos, EndPos, ObjectQParams, TraceQParams))
 	{
-		AActor *ActorHit = Result.GetActor();
-		if (ActorHit)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(ActorHit->GetName()));
-		}
 	}
+	return(Result);
 }
-
-void UGrabber::Release()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Grab released"));
-}
-
