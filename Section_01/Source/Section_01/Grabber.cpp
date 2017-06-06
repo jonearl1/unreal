@@ -19,9 +19,22 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
 	UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty"));
-	
+
+	///Look for physics handle
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!PhysicsHandle)
+		UE_LOG(LogTemp, Error, TEXT("Physics Handle not found on Actor %s"), *(GetOwner()->GetName() ) );
+
+	PawnInput = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (PawnInput)
+	{
+		PawnInput->BindAction(TEXT("Grab"), IE_Pressed, this, &UGrabber::Grab);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Pawn Input not found on Actor %s"), *(GetOwner()->GetName()));
+	}
 }
 
 
@@ -30,20 +43,41 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Get player viewpoint this tick
+	/// Get player viewpoint this tick
 	FVector Pos;
 	FRotator Rot;
 
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
 
-	UE_LOG(LogTemp, Warning, TEXT("PlayerPos %s, PlayerRot %s"), *Pos.ToString(), *Rot.ToString());
-	// Ray - cast out to reach distance
+	/// UE_LOG(LogTemp, Warning, TEXT("PlayerPos %s, PlayerRot %s"), *Pos.ToString(), *Rot.ToString());
+	/// Ray - cast out to reach distance
 
-	float Reach = 100.0f;
 	FVector EndPos = Pos + Rot.Vector() * Reach;
 	DrawDebugLine(GetWorld(), Pos, EndPos, FColor(255, 0, 0), false, 0.0f, 0, 10.0f );
+}
 
-	// see what we hit
+void UGrabber::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
+	FVector Pos;
+	FRotator Rot;
 
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Pos, Rot);
+
+	FVector EndPos = Pos + Rot.Vector() * Reach;
+
+	/// see what we hit
+	FHitResult Result;
+	FCollisionQueryParams TraceQParams(FName(TEXT("")), false, GetOwner());
+	FCollisionObjectQueryParams ObjectQParams(ECollisionChannel::ECC_PhysicsBody);
+
+	if (GetWorld()->LineTraceSingleByObjectType(Result, Pos, EndPos, ObjectQParams, TraceQParams))
+	{
+		AActor *ActorHit = Result.GetActor();
+		if (ActorHit)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(ActorHit->GetName()));
+		}
+	}
 }
 
