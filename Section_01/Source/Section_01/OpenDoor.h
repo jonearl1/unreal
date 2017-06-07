@@ -9,22 +9,20 @@
 #include "OpenDoor.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenRequest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCloseRequest);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SECTION_01_API UOpenDoor : public UActorComponent
+class SECTION_01_API UDoorEvent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UOpenDoor();
+	UDoorEvent();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-	void OpenDoor(void);
-	void CloseDoor(void);
 
 public:	
 	// Called every frame
@@ -42,10 +40,13 @@ private:
 	ATriggerVolume *PresurePlate = NULL;
 
 	UPROPERTY(EditAnywhere)
-	float DoorCloseDelay = 1.0f;
+	float TriggerMass = 30.0f;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnOpenRequest OnOpenRequest;
+	FOnOpenRequest OnOpen;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCloseRequest OnClose;
 
 	//UPROPERTY( EditAnywhere )
 	float LastDoorOpenTime = 0.0f;

@@ -4,7 +4,7 @@
 #include "Engine.h"
 
 // Sets default values for this component's properties
-UOpenDoor::UOpenDoor()
+UDoorEvent::UDoorEvent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -14,7 +14,7 @@ UOpenDoor::UOpenDoor()
 
 
 // Called when the game starts
-void UOpenDoor::BeginPlay()
+void UDoorEvent::BeginPlay()
 {
 	Super::BeginPlay(); 
 	Owner = GetOwner();
@@ -28,36 +28,21 @@ void UOpenDoor::BeginPlay()
 
 
 // Called every frame
-void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UDoorEvent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (GetTotalMassOfActorsOnPlate() >= 30.0f)
+	if (GetTotalMassOfActorsOnPlate() >= TriggerMass)
 	{
-		OpenDoor();
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+		OnOpen.Broadcast();
 	}
-
-	if( GetWorld()->GetTimeSeconds() > LastDoorOpenTime + DoorCloseDelay)
+	else
 	{
-		CloseDoor();
+		OnClose.Broadcast();
 	}
 }
 
-void UOpenDoor::OpenDoor( void )
-{
-	//if (Owner)
-	//	Owner->SetActorRotation(FRotator(0.0f, OrigYaw + OpenAngle, 0.0f));
-	OnOpenRequest.Broadcast();
-}
-
-void UOpenDoor::CloseDoor(void)
-{
-	if (Owner)
-		Owner->SetActorRotation(FRotator(0.0f, OrigYaw, 0.0f));
-}
-
-float UOpenDoor::GetTotalMassOfActorsOnPlate(void)
+float UDoorEvent::GetTotalMassOfActorsOnPlate(void)
 {
 	float weight = 0.0f;
 	if (PresurePlate)
