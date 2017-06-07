@@ -34,9 +34,6 @@ private:
 	float GetTotalMassOfActorsOnPlate(void);
 
 	UPROPERTY(EditAnywhere)
-	float	OpenAngle = -90.0f;
-
-	UPROPERTY(EditAnywhere)
 	ATriggerVolume *PresurePlate = NULL;
 
 	UPROPERTY(EditAnywhere)
