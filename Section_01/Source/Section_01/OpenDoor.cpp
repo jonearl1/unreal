@@ -19,9 +19,11 @@ void UOpenDoor::BeginPlay()
 	Super::BeginPlay(); 
 	Owner = GetOwner();
 	if( Owner )
-	{
 		OrigYaw = Owner->GetActorRotation().Yaw;
-	}
+
+	if (!PresurePlate)
+		UE_LOG(LogTemp, Error, TEXT("PresurePlate not found on Actor %s"), *(Owner->GetName()));
+
 }
 
 
@@ -44,12 +46,14 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UOpenDoor::OpenDoor( void )
 {
-	Owner->SetActorRotation(FRotator(0.0f, OrigYaw + OpenAngle, 0.0f));
+	if (Owner)
+		Owner->SetActorRotation(FRotator(0.0f, OrigYaw + OpenAngle, 0.0f));
 }
 
 void UOpenDoor::CloseDoor(void)
 {
-	Owner->SetActorRotation(FRotator(0.0f, OrigYaw, 0.0f));
+	if (Owner)
+		Owner->SetActorRotation(FRotator(0.0f, OrigYaw, 0.0f));
 }
 
 float UOpenDoor::GetTotalMassOfActorsOnPlate(void)

@@ -44,12 +44,14 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (PhysicsHandle->GetGrabbedComponent())
+	if (PhysicsHandle && PhysicsHandle->GetGrabbedComponent())
 		PhysicsHandle->SetTargetLocation(GetAttachedPos());
 }
 
 void UGrabber::Grab()
 {
+	if (!PhysicsHandle)
+		return;
 	FHitResult Result = GetFirstPhysicsBodyInReach();
 	AActor *ActorHit = Result.GetActor();
 	if (ActorHit)
@@ -61,6 +63,8 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
+	if (!PhysicsHandle)
+		return;
 	auto GrabbedComponent = PhysicsHandle->GetGrabbedComponent();
 	if (GrabbedComponent)
 		PhysicsHandle->ReleaseComponent();
