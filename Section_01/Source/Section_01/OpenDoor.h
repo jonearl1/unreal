@@ -4,14 +4,11 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/TriggerVolume.h" 
-#include "PhysicsEngine/PhysicsHandleComponent.h"
-#include "GameFramework/Actor.h"
-#include "Engine/World.h"
-
+#include "Engine.h"
 #include "Components/ActorComponent.h"
 #include "OpenDoor.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenRequest);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SECTION_01_API UOpenDoor : public UActorComponent
@@ -46,6 +43,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float DoorCloseDelay = 1.0f;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOpenRequest OnOpenRequest;
 
 	//UPROPERTY( EditAnywhere )
 	float LastDoorOpenTime = 0.0f;
